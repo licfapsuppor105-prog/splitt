@@ -1,1 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu du Jeu</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e1e2f, #3a3a5f);
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+        }
 
+        .menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        h1 {
+            font-size: 60px;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 20px;
+            background-color: #ff4c60;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #ff2e45;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu">
+        <h1>Mon Jeu</h1>
+        <button class="btn" onclick="startGame()">Jouer</button>
+    </div>
+
+    <!-- Musique -->
+    <audio id="music" src="Meni.mp3" autoplay loop></audio>
+
+    <script>
+        function startGame() {
+            window.location.href = "https://licfapsuppor105-prog.github.io/splitt/game.html";
+        }
+
+        // Contournement autoplay (nécessite interaction utilisateur sur certains navigateurs)
+        document.addEventListener('click', () => {
+            const music = document.getElementById('music');
+            music.play().catch(() => {});
+        });
+    </script>
+
+</body>
+</html>

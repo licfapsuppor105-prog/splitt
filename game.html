@@ -1,131 +1,93 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Mini Jeu - Esquive !</title>
-<style>
-    body {
-        margin: 0;
-        overflow: hidden;
-        background: black;
-        color: white;
-        font-family: Arial;
-        text-align: center;
+  <meta charset="UTF-8">
+  <title>Monde 1</title>
+  <style>
+    body { margin:0; overflow:hidden; background:black; }
+    canvas { display:block; }
+    #popup {
+      position:absolute;
+      top:40%; left:50%; transform:translate(-50%, -50%);
+      background:rgba(0,0,0,0.8);
+      color:white; padding:20px 40px;
+      font-size:32px; font-family:monospace;
+      border:2px solid white;
     }
-
-    canvas {
-        display: block;
-        margin: auto;
-        background: linear-gradient(to bottom, #222, #000);
-    }
-
-    #score {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        font-size: 20px;
-    }
-</style>
+  </style>
 </head>
 <body>
-
-<div id="score">Score: 0</div>
-<canvas id="gameCanvas" width="400" height="600"></canvas>
+<div id="popup">Monde 1</div>
+<audio id="music" src="sonBien (1).mp3" autoplay loop></audio>
+<canvas id="game"></canvas>
 
 <script>
-const canvas = document.getElementById("gameCanvas");
+const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-let player = {
-    x: 180,
-    y: 550,
-    width: 40,
-    height: 40,
-    speed: 5
-};
+// Remove popup after 2 seconds
+setTimeout(()=>{
+  document.getElementById("popup").style.display = "none";
+},2000);
 
-let obstacles = [];
-let score = 0;
-let gameOver = false;
-
-// Contrôles
+let player = { x:200, y:200, speed:3, crouch:false };
 let keys = {};
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
 
-// Créer obstacle
-function spawnObstacle() {
-    let size = Math.random() * 30 + 20;
-    obstacles.push({
-        x: Math.random() * (canvas.width - size),
-        y: -size,
-        width: size,
-        height: size,
-        speed: Math.random() * 3 + 2
-    });
+let bots = [];
+for(let i=0;i<5;i++){
+  bots.push({ x:Math.random()*800+100, y:Math.random()*500+100 });
 }
 
-// Collision
-function isColliding(a, b) {
-    return a.x < b.x + b.width &&
-           a.x + a.width > b.x &&
-           a.y < b.y + b.height &&
-           a.y + a.height > b.y;
+document.addEventListener("keydown", e=>{
+  keys[e.key.toLowerCase()] = true;
+});
+
+document.addEventListener("keyup", e=>{
+  keys[e.key.toLowerCase()] = false;
+});
+
+function update(){
+  if(keys['z'] || keys['arrowup']) player.y -= player.speed;
+  if(keys['s'] || keys['arrowdown']) player.y += player.speed;
+  if(keys['q'] || keys['arrowleft']) player.x -= player.speed;
+  if(keys['d'] || keys['arrowright']) player.x += player.speed;
+
+  player.crouch = keys['c'];
 }
 
-// Update
-function update() {
-    if (gameOver) return;
-
-    // Mouvement joueur
-    if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
-    if (keys["ArrowRight"] && player.x < canvas.width - player.width) player.x += player.speed;
-
-    // Obstacles
-    for (let i = 0; i < obstacles.length; i++) {
-        obstacles[i].y += obstacles[i].speed;
-
-        if (isColliding(player, obstacles[i])) {
-            gameOver = true;
-            alert("Game Over ! Score: " + score);
-            location.reload();
-        }
-    }
-
-    // Nettoyage
-    obstacles = obstacles.filter(o => o.y < canvas.height);
-
-    score++;
-    document.getElementById("score").textContent = "Score: " + score;
+function drawWeapon(){
+  ctx.fillStyle = "gray";
+  ctx.fillRect(canvas.width/2 - 20, canvas.height - 80, 40, 60);
 }
 
-// Draw
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Joueur
-    ctx.fillStyle = "cyan";
-    ctx.fillRect(player.x, player.y, player.width, player.height);
-
-    // Obstacles
+function drawBots(){
+  bots.forEach(bot=>{
     ctx.fillStyle = "red";
-    obstacles.forEach(o => {
-        ctx.fillRect(o.x, o.y, o.width, o.height);
-    });
+    ctx.fillRect(bot.x, bot.y, 20, 40);
+
+    // shooting line
+    ctx.strokeStyle = "yellow";
+    ctx.beginPath();
+    ctx.moveTo(bot.x+10, bot.y+20);
+    ctx.lineTo(player.x, player.y);
+    ctx.stroke();
+  });
 }
 
-// Loop
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
+function loop(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  update();
+
+  drawBots();
+  drawWeapon();
+
+  requestAnimationFrame(loop);
 }
 
-// Spawn régulier
-setInterval(spawnObstacle, 800);
-
-gameLoop();
+loop();
 </script>
-
 </body>
 </html>

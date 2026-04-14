@@ -1,1 +1,131 @@
-coune
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Mini Jeu - Esquive !</title>
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: black;
+        color: white;
+        font-family: Arial;
+        text-align: center;
+    }
+
+    canvas {
+        display: block;
+        margin: auto;
+        background: linear-gradient(to bottom, #222, #000);
+    }
+
+    #score {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 20px;
+    }
+</style>
+</head>
+<body>
+
+<div id="score">Score: 0</div>
+<canvas id="gameCanvas" width="400" height="600"></canvas>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let player = {
+    x: 180,
+    y: 550,
+    width: 40,
+    height: 40,
+    speed: 5
+};
+
+let obstacles = [];
+let score = 0;
+let gameOver = false;
+
+// Contrôles
+let keys = {};
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+// Créer obstacle
+function spawnObstacle() {
+    let size = Math.random() * 30 + 20;
+    obstacles.push({
+        x: Math.random() * (canvas.width - size),
+        y: -size,
+        width: size,
+        height: size,
+        speed: Math.random() * 3 + 2
+    });
+}
+
+// Collision
+function isColliding(a, b) {
+    return a.x < b.x + b.width &&
+           a.x + a.width > b.x &&
+           a.y < b.y + b.height &&
+           a.y + a.height > b.y;
+}
+
+// Update
+function update() {
+    if (gameOver) return;
+
+    // Mouvement joueur
+    if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
+    if (keys["ArrowRight"] && player.x < canvas.width - player.width) player.x += player.speed;
+
+    // Obstacles
+    for (let i = 0; i < obstacles.length; i++) {
+        obstacles[i].y += obstacles[i].speed;
+
+        if (isColliding(player, obstacles[i])) {
+            gameOver = true;
+            alert("Game Over ! Score: " + score);
+            location.reload();
+        }
+    }
+
+    // Nettoyage
+    obstacles = obstacles.filter(o => o.y < canvas.height);
+
+    score++;
+    document.getElementById("score").textContent = "Score: " + score;
+}
+
+// Draw
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Joueur
+    ctx.fillStyle = "cyan";
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+
+    // Obstacles
+    ctx.fillStyle = "red";
+    obstacles.forEach(o => {
+        ctx.fillRect(o.x, o.y, o.width, o.height);
+    });
+}
+
+// Loop
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+// Spawn régulier
+setInterval(spawnObstacle, 800);
+
+gameLoop();
+</script>
+
+</body>
+</html>

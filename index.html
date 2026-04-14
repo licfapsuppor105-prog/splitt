@@ -7,9 +7,8 @@
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #1e1e2f, #3a3a5f);
+            background: linear-gradient(to bottom, red, black);
             font-family: Arial, sans-serif;
-            color: white;
             text-align: center;
         }
 
@@ -23,6 +22,7 @@
         h1 {
             font-size: 60px;
             margin-bottom: 40px;
+            color: black;
         }
 
         .btn {
@@ -57,7 +57,6 @@
             window.location.href = "https://licfapsuppor105-prog.github.io/splitt/game.html";
         }
 
-        // Contournement autoplay (nécessite interaction utilisateur sur certains navigateurs)
         document.addEventListener('click', () => {
             const music = document.getElementById('music');
             music.play().catch(() => {});

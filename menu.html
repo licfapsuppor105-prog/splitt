@@ -30,18 +30,10 @@
   }
 
   h1 img{
-    height:160px;
+    height:140px;
     width:auto;
     object-fit:contain;
     mix-blend-mode: lighten;
-    filter: none;
-  }
-
-  h1 img{
-    height:80px;
-    width:auto;
-    border-radius:10px;
-    box-shadow:0 0 15px #00ff99;
   }
 
   .btn {
@@ -66,7 +58,8 @@
 </style>
 </head>
 <body>
-<audio id="music" src="sonBien (1).mp3" autoplay muted loop></audio></audio>
+
+<audio id="music" src="Meni.mp3" autoplay muted loop></audio>
 
 <div class="menu">
   <h1>
@@ -84,18 +77,22 @@
 </div>
 
 <script>
-<script>
-// autoplay avec déblocage du son
 const music = document.getElementById("music");
 
-function unmute(){
+// lancer en muted (autorisé)
+music.play().catch(()=>{});
+
+function unlockAudio(){
   music.muted = false;
-  music.play();
+  music.volume = 1;
+  music.play().catch(()=>{});
 }
 
-document.addEventListener("click", unmute, { once:true });
-document.addEventListener("mousemove", unmute, { once:true });
-document.addEventListener("keydown", unmute, { once:true });
+// IMPORTANT: déclenche AVANT redirection
+window.addEventListener("mousedown", unlockAudio);
+window.addEventListener("keydown", unlockAudio);
+window.addEventListener("mousemove", unlockAudio);
 </script>
+
 </body>
 </html>

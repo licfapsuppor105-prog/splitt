@@ -6,20 +6,33 @@
 <style>
   body { margin:0; overflow:hidden; background:black; }
   canvas { display:block; }
-  #popup {
+  #popup, #winPopup {
     position:absolute;
     top:40%; left:50%; transform:translate(-50%, -50%);
-    background:rgba(0,0,0,0.8);
+    background:rgba(0,0,0,0.85);
     color:white; padding:20px 40px;
     font-size:32px; font-family:monospace;
     border:2px solid white;
+    text-align:center;
+  }
+  #winPopup{ display:none; }
+  button{
+    margin-top:20px;
+    padding:10px 20px;
+    font-size:20px;
+    cursor:pointer;
   }
 </style>
 </head>
 <body>
 
 <div id="popup">Monde 1</div>
-<audio src="sonBien (1).mp3" autoplay loop></audio>
+<div id="winPopup">
+  Vous avez gagné<br>
+  <button onclick="location.href='https://licfapsuppor105-prog.github.io/splitt/game2'">Suivant</button>
+</div>
+
+<audio id="music" src="sonBien (1).mp3" autoplay muted loop></audio>
 <canvas id="game"></canvas>
 
 <script>
@@ -28,9 +41,21 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+// débloquer son
+document.addEventListener("click", ()=>{
+  const m = document.getElementById("music");
+  m.muted = false;
+  m.play();
+}, {once:true});
+
 setTimeout(()=>{
   document.getElementById("popup").style.display = "none";
 },2000);
+
+// FIN après 2 min
+setTimeout(()=>{
+  document.getElementById("winPopup").style.display = "block";
+},120000);
 
 const map = [
   [1,1,1,1,1,1,1,1],
@@ -47,18 +72,26 @@ let keys = {};
 let shoot = false;
 let recoil = 0;
 
+// INPUT
+
 document.addEventListener("keydown", e=> keys[e.key.toLowerCase()] = true);
 document.addEventListener("keyup", e=> keys[e.key.toLowerCase()] = false);
-document.addEventListener("click", ()=> {
-  shoot = true;
-  recoil = 10;
-});
+document.addEventListener("click", ()=> { shoot = true; recoil = 10; });
 
-// BOTS avec PV
-let bots = [
-  {x:5.5,y:5.5,hp:3},
-  {x:2.5,y:5.5,hp:3}
-];
+// BOTS dynamiques
+let bots = [];
+
+function spawnBot(){
+  let hp = Math.floor(Math.random()*5)+1; // 1 à 5 PV
+  bots.push({
+    x:Math.random()*6+1,
+    y:Math.random()*5+1,
+    hp:hp
+  });
+}
+
+// spawn toutes les 2 sec
+setInterval(spawnBot,2000);
 
 function normalizeAngle(a){
   while(a < -Math.PI) a += Math.PI*2;
@@ -138,8 +171,8 @@ function drawBots(){
     let size = 300 / dist;
     let screenX = canvas.width/2 + Math.tan(angle)*400;
 
-    // couleur selon vie
-    let color = bot.hp == 3 ? "red" : bot.hp == 2 ? "orange" : "yellow";
+    // couleur selon résistance
+    let color = bot.hp >=4 ? "purple" : bot.hp>=3 ? "red" : bot.hp>=2 ? "orange" : "yellow";
 
     ctx.fillStyle = color;
     ctx.fillRect(screenX - size/3, canvas.height/2 - size/2, size*0.6, size);
@@ -153,19 +186,16 @@ function drawBots(){
 function drawWeapon(){
   let yOffset = recoil;
 
-  // arme 32-bit style (dégradé)
   let grad = ctx.createLinearGradient(0,0,0,canvas.height);
-  grad.addColorStop(0,"#888");
-  grad.addColorStop(1,"#222");
+  grad.addColorStop(0,"#aaa");
+  grad.addColorStop(1,"#111");
 
   ctx.fillStyle = grad;
-  ctx.fillRect(canvas.width/2 - 50, canvas.height - 100 + yOffset, 100, 90);
+  ctx.fillRect(canvas.width/2 - 60, canvas.height - 100 + yOffset, 120, 90);
 
-  // canon
-  ctx.fillStyle = "#111";
-  ctx.fillRect(canvas.width/2 - 10, canvas.height - 110 + yOffset, 20, 30);
+  ctx.fillStyle = "#000";
+  ctx.fillRect(canvas.width/2 - 15, canvas.height - 120 + yOffset, 30, 40);
 
-  // viseur
   ctx.strokeStyle = "white";
   ctx.beginPath();
   ctx.moveTo(canvas.width/2 - 10, canvas.height/2);

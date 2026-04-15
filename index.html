@@ -2,86 +2,40 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Menu FPS</title>
+<title>Intro</title>
 <style>
-  body {
-    margin:0;
+  body { margin:0; overflow:hidden; background:black; }
+  video {
+    width:100vw;
     height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background: radial-gradient(circle at center, #001a00, #000);
-    font-family:monospace;
-    color:white;
-  }
-
-  .menu {
-    text-align:center;
-  }
-
-  h1 {
-    font-size:70px;
-    margin-bottom:60px;
-    text-shadow:0 0 20px #0f0, 0 0 40px #0f0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:25px;
-  }
-
-  h1 img{
-    height:160px;
-    width:auto;
-    object-fit:contain;
-    mix-blend-mode: lighten;
-    filter: none;
-  }
-
-  h1 img{
-    height:80px;
-    width:auto;
-    border-radius:10px;
-    box-shadow:0 0 15px #00ff99;
-  }
-
-  .btn {
-    display:block;
-    margin:20px auto;
-    padding:20px 80px;
-    font-size:28px;
-    border:none;
-    cursor:pointer;
-    border-radius:12px;
-    background:linear-gradient(45deg,#00ff99,#00cc66);
-    color:black;
-    box-shadow:0 0 20px #00ff99;
-    transition:0.3s;
-    text-decoration:none;
-  }
-
-  .btn:hover {
-    transform:scale(1.1);
-    box-shadow:0 0 40px #00ff99;
+    object-fit:cover;
   }
 </style>
 </head>
 <body>
-<audio src="sonBien (1).mp3" autoplay loop></audio>
 
-<div class="menu">
-  <h1>
-    <img src="Splitt.jpg" alt="logo">
-    SPLITT
-  </h1>
+<video id="intro" autoplay muted>
+  <source src="videointro.mp4" type="video/mp4">
+</video>
 
-  <a class="btn" href="https://licfapsuppor105-prog.github.io/splitt/game.html">
-    Jouer
-  </a>
+<script>
+const video = document.getElementById("intro");
 
-  <a class="btn" href="https://licfapsuppor105-prog.github.io/splitt/credits.html">
-    Crédits
-  </a>
-</div>
+// activer le son dès interaction
+function unmute(){
+  video.muted = false;
+  video.play();
+}
+
+document.addEventListener("click", unmute, {once:true});
+document.addEventListener("mousemove", unmute, {once:true});
+document.addEventListener("keydown", unmute, {once:true});
+
+// redirection après 22 secondes
+setTimeout(()=>{
+  window.location.href = "https://licfapsuppor105-prog.github.io/splitt/menu";
+},22000);
+</script>
 
 </body>
 </html>

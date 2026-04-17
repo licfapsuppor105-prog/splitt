@@ -10,7 +10,6 @@
       background: #050505;
       color: #00ff9c;
       font-family: "Courier New", monospace;
-      height: 100vh;
       overflow: hidden;
     }
 
@@ -18,7 +17,7 @@
       text-align: center;
       position: absolute;
       width: 100%;
-      bottom: -100%;
+      top: 100%;
       animation: scrollCredits 25s linear infinite;
     }
 
@@ -40,21 +39,28 @@
     }
 
     @keyframes scrollCredits {
-      0% { transform: translateY(100%); }
-      100% { transform: translateY(-120%); }
-    }
-
-    .glow {
-      color: #00ff9c;
-      text-shadow: 0 0 5px #00ff9c, 0 0 15px #00ff9c;
+      0% { transform: translateY(0%); }
+      100% { transform: translateY(-200%); }
     }
   </style>
 </head>
 <body>
 
-<audio autoplay loop>
+<audio id="bgmusic" loop>
   <source src="3Morceau sans titre (17 avr. 2026 13%3A35).mp3" type="audio/mpeg">
 </audio>
+
+<script>
+  const audio = document.getElementById("bgmusic");
+
+  // Essaye autoplay
+  audio.play().catch(() => {
+    // Si bloqué, attendre interaction utilisateur
+    document.addEventListener("click", () => {
+      audio.play();
+    }, { once: true });
+  });
+</script>
 
 <div class="container">
   <h1>SPLITT</h1>

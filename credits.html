@@ -10,16 +10,16 @@
       background: #050505;
       color: #00ff9c;
       font-family: "Courier New", monospace;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       height: 100vh;
       overflow: hidden;
     }
 
     .container {
       text-align: center;
-      animation: fadeIn 2s ease-in;
+      position: absolute;
+      width: 100%;
+      bottom: -100%;
+      animation: scrollCredits 25s linear infinite;
     }
 
     h1 {
@@ -39,18 +39,9 @@
       opacity: 0.9;
     }
 
-    .credits {
-      animation: scrollCredits 20s linear infinite;
-    }
-
     @keyframes scrollCredits {
       0% { transform: translateY(100%); }
       100% { transform: translateY(-120%); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
     }
 
     .glow {
@@ -61,32 +52,34 @@
 </head>
 <body>
 
+<audio autoplay loop>
+  <source src="3Morceau sans titre (17 avr. 2026 13%3A35).mp3" type="audio/mpeg">
+</audio>
+
 <div class="container">
   <h1>SPLITT</h1>
 
-  <div class="credits">
-    <h2>Projet SPLITT</h2>
-    <p>[avec Yotvin, txotxo, tim, et autres créateurs]</p>
+  <h2>Projet SPLITT</h2>
+  <p>[avec Yotvin, txotxo, tim, et autres créateurs]</p>
 
-    <h2>Programmation</h2>
-    <p>[code HTML, CSS]</p>
+  <h2>Programmation</h2>
+  <p>[code HTML, CSS]</p>
 
-    <h2>directeur des programmes</h2>
-    <p>[LSE]</p>
+  <h2>directeur des programmes</h2>
+  <p>[LSE]</p>
 
-    <h2>Audio</h2>
-    <p>Musique : [Yotvin, suno ai, et LSE]</p>
-    <p>Effets : [pas d'effets.]</p>
+  <h2>Audio</h2>
+  <p>Musique : [Yotvin, suno ai, et LSE]</p>
+  <p>Effets : [pas d'effets.]</p>
 
-    <h2>Tests</h2>
-    <p>txotxo</p>
+  <h2>Tests</h2>
+  <p>txotxo</p>
 
-    <h2>Remerciements</h2>
-    <p>txotxo, Tim, LSE, Yotvin, et tout les testeurs</p>
+  <h2>Remerciements</h2>
+  <p>txotxo, Tim, LSE, Yotvin, et tout les testeurs</p>
 
-    <h2>License</h2>
-    <p>© 2026 - SPLITT, jeu web</p>
-  </div>
+  <h2>License</h2>
+  <p>© 2026 - SPLITT, jeu web</p>
 </div>
 
 </body>

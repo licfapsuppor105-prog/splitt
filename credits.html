@@ -1,1 +1,93 @@
-ici
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Crédits - Splitt</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #050505;
+      color: #00ff9c;
+      font-family: "Courier New", monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+      animation: fadeIn 2s ease-in;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #00ff9c, 0 0 20px #00ff9c;
+    }
+
+    h2 {
+      margin-top: 25px;
+      font-size: 1.5em;
+      text-shadow: 0 0 5px #00ff9c;
+    }
+
+    p {
+      margin: 5px 0;
+      opacity: 0.9;
+    }
+
+    .credits {
+      animation: scrollCredits 20s linear infinite;
+    }
+
+    @keyframes scrollCredits {
+      0% { transform: translateY(100%); }
+      100% { transform: translateY(-120%); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .glow {
+      color: #00ff9c;
+      text-shadow: 0 0 5px #00ff9c, 0 0 15px #00ff9c;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>SPLITT</h1>
+
+  <div class="credits">
+    <h2>Projet SPLITT</h2>
+    <p>[avec Yotvin, txotxo, tim, et autres créateurs]</p>
+
+    <h2>Programmation</h2>
+    <p>[code HTML, CSS]</p>
+
+    <h2>directeur des programmes</h2>
+    <p>[LSE]</p>
+
+    <h2>Audio</h2>
+    <p>Musique : [Yotvin, suno ai, et LSE]</p>
+    <p>Effets : [pas d'effets.]</p>
+
+    <h2>Tests</h2>
+    <p>txotxo</p>
+
+    <h2>Remerciements</h2>
+    <p>txotxo, Tim, LSE, Yotvin, et tout les testeurs</p>
+
+    <h2>License</h2>
+    <p>© 2026 - SPLITT, jeu web</p>
+  </div>
+</div>
+
+</body>
+</html>

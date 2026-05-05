@@ -90,17 +90,32 @@ let player = {
   y:3.5,
   angle:0,
   speed:0.08,
-  hp:100
+  hp:200,
+  crouching:false,
+  jump:0,
+  velocityY:0
 };
 
 let gameOver = false;
 let keys = {};
 let recoil = 0;
+let mouseSensitivity = 0.002;
 let shoot = false;
 let hurtFlash = 0;
 
 addEventListener("keydown",e=>keys[e.key.toLowerCase()] = true);
 addEventListener("keyup",e=>keys[e.key.toLowerCase()] = false);
+
+// contrôle souris
+canvas.addEventListener("click", ()=>{
+  canvas.requestPointerLock();
+});
+
+document.addEventListener("mousemove", (e)=>{
+  if(document.pointerLockElement === canvas){
+    player.angle += e.movementX * mouseSensitivity;
+  }
+});
 
 addEventListener("click",()=>{
   shoot = true;
@@ -132,8 +147,22 @@ function normalizeAngle(a){
 function update(){
   if(gameOver) return;
 
-  if(keys['q']) player.angle -= 0.06;
-  if(keys['d']) player.angle += 0.06;
+  // accroupi
+player.crouching = keys['c'];
+
+// saut
+if(keys[' '] && player.jump === 0){
+  player.velocityY = -8;
+  player.jump = 1;
+}
+
+player.velocityY += 0.4;
+player.jump += player.velocityY;
+
+if(player.jump > 0){
+  player.jump = 0;
+  player.velocityY = 0;
+}
 
   let mx = Math.cos(player.angle)*player.speed;
   let my = Math.sin(player.angle)*player.speed;
@@ -166,7 +195,7 @@ function update(){
     // attaque
     if(dist < 1.5){
       if(bot.attackCooldown <=0){
-        player.hp -= 5;
+        player.hp -= 2;
         hurtFlash = 10;
         bot.attackCooldown = 50;
 
@@ -280,6 +309,10 @@ function drawBots(){
 function drawWeapon(){
   let y = recoil;
 
+  // accroupi + saut
+  if(player.crouching) y += 40;
+  y += player.jump * 2;
+
   let grad = ctx.createLinearGradient(0,0,0,canvas.height);
   grad.addColorStop(0,"#999");
   grad.addColorStop(1,"#111");
@@ -301,6 +334,12 @@ function drawWeapon(){
 }
 
 function drawHUD(){
+  // infos contrôles
+  ctx.fillStyle = "white";
+  ctx.font = "16px monospace";
+  ctx.fillText("Souris = tourner | C = accroupi | Espace = saut",20,80);
+
+(){
   // fond barre vie
   ctx.fillStyle = "#222";
   ctx.fillRect(20,20,300,30);
@@ -319,10 +358,10 @@ function drawHUD(){
 
 function loop(){
   ctx.fillStyle = "#00aa00";
-  ctx.fillRect(0,0,canvas.width,canvas.height/2);
+  ctx.fillRect(0,player.jump,canvas.width,canvas.height/2);
 
   ctx.fillStyle = "#003300";
-  ctx.fillRect(0,canvas.height/2,canvas.width,canvas.height/2);
+  ctx.fillRect(0,canvas.height/2 + player.jump,canvas.width,canvas.height/2);
 
   update();
   draw3D();

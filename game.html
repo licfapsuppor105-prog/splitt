@@ -3,15 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <title>Monde 1</title>
+
 <style>
 body{
   margin:0;
   overflow:hidden;
   background:black;
 }
+
 canvas{
   display:block;
 }
+
 #popup,#winPopup,#deadPopup{
   position:absolute;
   top:40%;
@@ -25,9 +28,11 @@ canvas{
   font-family:monospace;
   text-align:center;
 }
+
 #winPopup,#deadPopup{
   display:none;
 }
+
 button{
   margin-top:20px;
   padding:12px 25px;
@@ -36,6 +41,7 @@ button{
 }
 </style>
 </head>
+
 <body>
 
 <div id="popup">Monde 1</div>
@@ -52,15 +58,19 @@ button{
 </div>
 
 <audio id="music" src="sonBien (1).mp3" autoplay muted loop></audio>
+
 <canvas id="game"></canvas>
 
 <script>
+
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
 const music = document.getElementById("music");
+
 window.addEventListener("mousedown",()=>{
   music.muted = false;
   music.play();
@@ -103,20 +113,26 @@ let mouseSensitivity = 0.002;
 let shoot = false;
 let hurtFlash = 0;
 
-addEventListener("keydown",e=>keys[e.key.toLowerCase()] = true);
-addEventListener("keyup",e=>keys[e.key.toLowerCase()] = false);
+addEventListener("keydown",e=>{
+  keys[e.key.toLowerCase()] = true;
+});
 
-// contrôle souris
-canvas.addEventListener("click", ()=>{
+addEventListener("keyup",e=>{
+  keys[e.key.toLowerCase()] = false;
+});
+
+// souris
+canvas.addEventListener("click",()=>{
   canvas.requestPointerLock();
 });
 
-document.addEventListener("mousemove", (e)=>{
+document.addEventListener("mousemove",(e)=>{
   if(document.pointerLockElement === canvas){
     player.angle += e.movementX * mouseSensitivity;
   }
 });
 
+// tir
 addEventListener("click",()=>{
   shoot = true;
   recoil = 12;
@@ -125,6 +141,7 @@ addEventListener("click",()=>{
 let bots = [];
 
 function spawnBot(){
+
   let hp = Math.floor(Math.random()*4)+2;
 
   bots.push({
@@ -139,87 +156,114 @@ function spawnBot(){
 setInterval(spawnBot,1500);
 
 function normalizeAngle(a){
+
   while(a < -Math.PI) a += Math.PI*2;
   while(a > Math.PI) a -= Math.PI*2;
+
   return a;
 }
 
 function update(){
+
   if(gameOver) return;
 
   // accroupi
-player.crouching = keys['c'];
+  player.crouching = keys["c"];
 
-// saut
-if(keys[' '] && player.jump === 0){
-  player.velocityY = -8;
-  player.jump = 1;
-}
-
-player.velocityY += 0.4;
-player.jump += player.velocityY;
-
-if(player.jump > 0){
-  player.jump = 0;
-  player.velocityY = 0;
-}
-
-  let mx = Math.cos(player.angle)*player.speed;
-  let my = Math.sin(player.angle)*player.speed;
-
-  if(keys['z']){
-    if(map[Math.floor(player.y)][Math.floor(player.x+mx)]==0) player.x += mx;
-    if(map[Math.floor(player.y+my)][Math.floor(player.x)]==0) player.y += my;
+  // saut
+  if(keys[" "] && player.jump === 0){
+    player.velocityY = -8;
+    player.jump = 1;
   }
 
-  if(keys['s']){
-    if(map[Math.floor(player.y)][Math.floor(player.x-mx)]==0) player.x -= mx;
-    if(map[Math.floor(player.y-my)][Math.floor(player.x)]==0) player.y -= my;
+  player.velocityY += 0.4;
+  player.jump += player.velocityY;
+
+  if(player.jump > 0){
+    player.jump = 0;
+    player.velocityY = 0;
+  }
+
+  let mx = Math.cos(player.angle) * player.speed;
+  let my = Math.sin(player.angle) * player.speed;
+
+  if(keys["z"]){
+    if(map[Math.floor(player.y)][Math.floor(player.x+mx)] == 0)
+      player.x += mx;
+
+    if(map[Math.floor(player.y+my)][Math.floor(player.x)] == 0)
+      player.y += my;
+  }
+
+  if(keys["s"]){
+
+    if(map[Math.floor(player.y)][Math.floor(player.x-mx)] == 0)
+      player.x -= mx;
+
+    if(map[Math.floor(player.y-my)][Math.floor(player.x)] == 0)
+      player.y -= my;
   }
 
   bots.forEach(bot=>{
-    if(bot.hp<=0) return;
+
+    if(bot.hp <= 0) return;
 
     bot.walk += 0.1;
 
-    let dx = player.x-bot.x;
-    let dy = player.y-bot.y;
+    let dx = player.x - bot.x;
+    let dy = player.y - bot.y;
+
     let dist = Math.hypot(dx,dy);
 
     // poursuite
     if(dist > 1.2){
-      bot.x += dx/dist*0.01;
-      bot.y += dy/dist*0.01;
+
+      bot.x += dx/dist * 0.01;
+      bot.y += dy/dist * 0.01;
     }
 
     // attaque
     if(dist < 1.5){
-      if(bot.attackCooldown <=0){
+
+      if(bot.attackCooldown <= 0){
+
         player.hp -= 2;
+
         hurtFlash = 10;
+
         bot.attackCooldown = 50;
 
-        if(player.hp <=0){
+        if(player.hp <= 0){
+
           document.getElementById("deadPopup").style.display = "block";
+
           gameOver = true;
         }
       }
     }
 
-    if(bot.attackCooldown >0) bot.attackCooldown--;
+    if(bot.attackCooldown > 0)
+      bot.attackCooldown--;
   });
 
+  // tir
   if(shoot){
-    bots.forEach(bot=>{
-      if(bot.hp<=0) return;
 
-      let dx = bot.x-player.x;
-      let dy = bot.y-player.y;
+    bots.forEach(bot=>{
+
+      if(bot.hp <= 0) return;
+
+      let dx = bot.x - player.x;
+      let dy = bot.y - player.y;
+
       let dist = Math.hypot(dx,dy);
+
       let angleToBot = Math.atan2(dy,dx);
+
       let diff = normalizeAngle(angleToBot-player.angle);
 
-      if(Math.abs(diff)<0.12 && dist<7){
+      if(Math.abs(diff) < 0.12 && dist < 7){
+
         bot.hp--;
       }
     });
@@ -227,26 +271,41 @@ if(player.jump > 0){
     shoot = false;
   }
 
-  if(recoil>0) recoil--;
-  if(hurtFlash>0) hurtFlash--;
+  if(recoil > 0) recoil--;
+
+  if(hurtFlash > 0) hurtFlash--;
 }
 
 function draw3D(){
+
   let fov = Math.PI/3;
 
   for(let x=0;x<canvas.width;x++){
-    let rayAngle = player.angle-fov/2+(x/canvas.width)*fov;
+
+    let rayAngle =
+      player.angle - fov/2 +
+      (x/canvas.width)*fov;
 
     for(let depth=0.1;depth<10;depth+=0.03){
+
       let rx = player.x + Math.cos(rayAngle)*depth;
       let ry = player.y + Math.sin(rayAngle)*depth;
 
-      if(map[Math.floor(ry)][Math.floor(rx)]==1){
-        let h = canvas.height/depth;
-        let shade = 255-depth*40;
+      if(map[Math.floor(ry)][Math.floor(rx)] == 1){
+
+        let h = canvas.height / depth;
+
+        let shade = 255 - depth*40;
 
         ctx.fillStyle = `rgb(0,${shade},0)`;
-        ctx.fillRect(x,canvas.height/2-h/2,1,h);
+
+        ctx.fillRect(
+          x,
+          canvas.height/2-h/2 + player.jump,
+          1,
+          h
+        );
+
         break;
       }
     }
@@ -254,131 +313,273 @@ function draw3D(){
 }
 
 function drawEnemy(screenX,size,bot){
+
   let bob = Math.sin(bot.walk)*4;
 
   // jambes
   ctx.fillStyle = "#111";
-  ctx.fillRect(screenX-size*0.18, canvas.height/2+size*0.05+bob, size*0.12, size*0.35);
-  ctx.fillRect(screenX+size*0.06, canvas.height/2+size*0.05+bob, size*0.12, size*0.35);
+
+  ctx.fillRect(
+    screenX-size*0.18,
+    canvas.height/2+size*0.05+bob+player.jump,
+    size*0.12,
+    size*0.35
+  );
+
+  ctx.fillRect(
+    screenX+size*0.06,
+    canvas.height/2+size*0.05+bob+player.jump,
+    size*0.12,
+    size*0.35
+  );
 
   // torse
-  let bodyColor = bot.hp >= 5 ? "#5500aa" : bot.hp >=3 ? "#aa0000" : "#cc6600";
+  let bodyColor =
+    bot.hp >= 5 ? "#5500aa" :
+    bot.hp >= 3 ? "#aa0000" :
+    "#cc6600";
+
   ctx.fillStyle = bodyColor;
-  ctx.fillRect(screenX-size*0.22, canvas.height/2-size*0.2+bob, size*0.44, size*0.5);
+
+  ctx.fillRect(
+    screenX-size*0.22,
+    canvas.height/2-size*0.2+bob+player.jump,
+    size*0.44,
+    size*0.5
+  );
 
   // bras
   ctx.fillStyle = "#222";
-  ctx.fillRect(screenX-size*0.33, canvas.height/2-size*0.15+bob, size*0.1, size*0.35);
-  ctx.fillRect(screenX+size*0.23, canvas.height/2-size*0.15+bob, size*0.1, size*0.35);
+
+  ctx.fillRect(
+    screenX-size*0.33,
+    canvas.height/2-size*0.15+bob+player.jump,
+    size*0.1,
+    size*0.35
+  );
+
+  ctx.fillRect(
+    screenX+size*0.23,
+    canvas.height/2-size*0.15+bob+player.jump,
+    size*0.1,
+    size*0.35
+  );
 
   // arme
   ctx.fillStyle = "black";
-  ctx.fillRect(screenX+size*0.2, canvas.height/2+bob, size*0.22, size*0.06);
+
+  ctx.fillRect(
+    screenX+size*0.2,
+    canvas.height/2+bob+player.jump,
+    size*0.22,
+    size*0.06
+  );
 
   // tête
   ctx.fillStyle = "#d9a066";
+
   ctx.beginPath();
-  ctx.arc(screenX, canvas.height/2-size*0.38+bob, size*0.14, 0, Math.PI*2);
+
+  ctx.arc(
+    screenX,
+    canvas.height/2-size*0.38+bob+player.jump,
+    size*0.14,
+    0,
+    Math.PI*2
+  );
+
   ctx.fill();
 
   // yeux
   ctx.fillStyle = "black";
-  ctx.fillRect(screenX-size*0.05, canvas.height/2-size*0.42+bob, size*0.03, size*0.03);
-  ctx.fillRect(screenX+size*0.02, canvas.height/2-size*0.42+bob, size*0.03, size*0.03);
+
+  ctx.fillRect(
+    screenX-size*0.05,
+    canvas.height/2-size*0.42+bob+player.jump,
+    size*0.03,
+    size*0.03
+  );
+
+  ctx.fillRect(
+    screenX+size*0.02,
+    canvas.height/2-size*0.42+bob+player.jump,
+    size*0.03,
+    size*0.03
+  );
 }
 
 function drawBots(){
+
   bots.forEach(bot=>{
-    if(bot.hp<=0) return;
+
+    if(bot.hp <= 0) return;
 
     let dx = bot.x-player.x;
     let dy = bot.y-player.y;
+
     let dist = Math.hypot(dx,dy);
 
-    let angle = normalizeAngle(Math.atan2(dy,dx)-player.angle);
+    let angle =
+      normalizeAngle(
+        Math.atan2(dy,dx)-player.angle
+      );
 
-    if(Math.abs(angle)>0.5) return;
+    if(Math.abs(angle) > 0.5) return;
 
     let size = 340/dist;
-    let screenX = canvas.width/2 + Math.tan(angle)*450;
+
+    let screenX =
+      canvas.width/2 +
+      Math.tan(angle)*450;
 
     drawEnemy(screenX,size,bot);
   });
 }
 
 function drawWeapon(){
+
   let y = recoil;
 
-  // accroupi + saut
   if(player.crouching) y += 40;
+
   y += player.jump * 2;
 
-  let grad = ctx.createLinearGradient(0,0,0,canvas.height);
+  let grad =
+    ctx.createLinearGradient(
+      0,0,0,canvas.height
+    );
+
   grad.addColorStop(0,"#999");
   grad.addColorStop(1,"#111");
 
   ctx.fillStyle = grad;
-  ctx.fillRect(canvas.width/2-90, canvas.height-120+y, 180, 110);
+
+  ctx.fillRect(
+    canvas.width/2-90,
+    canvas.height-120+y,
+    180,
+    110
+  );
 
   ctx.fillStyle = "#111";
-  ctx.fillRect(canvas.width/2-20, canvas.height-145+y, 40, 50);
+
+  ctx.fillRect(
+    canvas.width/2-20,
+    canvas.height-145+y,
+    40,
+    50
+  );
 
   // viseur
   ctx.strokeStyle = "white";
+
   ctx.beginPath();
+
   ctx.moveTo(canvas.width/2-8,canvas.height/2);
   ctx.lineTo(canvas.width/2+8,canvas.height/2);
+
   ctx.moveTo(canvas.width/2,canvas.height/2-8);
   ctx.lineTo(canvas.width/2,canvas.height/2+8);
+
   ctx.stroke();
 }
 
 function drawHUD(){
+
   // infos contrôles
   ctx.fillStyle = "white";
   ctx.font = "16px monospace";
-  ctx.fillText("Souris = tourner | C = accroupi | Espace = saut",20,80);
 
-(){
-  // fond barre vie
+  ctx.fillText(
+    "Souris = tourner | C = accroupi | Espace = saut",
+    20,
+    80
+  );
+
+  // fond vie
   ctx.fillStyle = "#222";
+
   ctx.fillRect(20,20,300,30);
 
   // vie
-  ctx.fillStyle = player.hp > 50 ? "lime" : player.hp > 20 ? "orange" : "red";
-  ctx.fillRect(20,20,player.hp*3,30);
+  ctx.fillStyle =
+    player.hp > 100 ? "lime" :
+    player.hp > 50 ? "orange" :
+    "red";
+
+  ctx.fillRect(
+    20,
+    20,
+    player.hp*1.5,
+    30
+  );
 
   ctx.strokeStyle = "white";
+
   ctx.strokeRect(20,20,300,30);
 
   ctx.fillStyle = "white";
   ctx.font = "20px monospace";
-  ctx.fillText("Vie : " + player.hp, 30,42);
+
+  ctx.fillText(
+    "Vie : " + player.hp,
+    30,
+    42
+  );
 }
 
 function loop(){
-  ctx.fillStyle = "#00aa00";
-  ctx.fillRect(0,player.jump,canvas.width,canvas.height/2);
 
+  // ciel
+  ctx.fillStyle = "#00aa00";
+
+  ctx.fillRect(
+    0,
+    player.jump,
+    canvas.width,
+    canvas.height/2
+  );
+
+  // sol
   ctx.fillStyle = "#003300";
-  ctx.fillRect(0,canvas.height/2 + player.jump,canvas.width,canvas.height/2);
+
+  ctx.fillRect(
+    0,
+    canvas.height/2 + player.jump,
+    canvas.width,
+    canvas.height/2
+  );
 
   update();
+
   draw3D();
+
   drawBots();
+
   drawWeapon();
+
   drawHUD();
 
-  // effet dégâts
-  if(hurtFlash>0){
-    ctx.fillStyle = `rgba(255,0,0,${hurtFlash/20})`;
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+  // dégâts
+  if(hurtFlash > 0){
+
+    ctx.fillStyle =
+      `rgba(255,0,0,${hurtFlash/20})`;
+
+    ctx.fillRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
   }
 
   requestAnimationFrame(loop);
 }
 
 loop();
+
 </script>
+
 </body>
 </html>

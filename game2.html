@@ -1,1 +1,279 @@
-o
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Monde 2</title>
+<style>
+body{
+  margin:0;
+  overflow:hidden;
+  background:black;
+}
+canvas{
+  display:block;
+}
+#popup,#winPopup{
+  position:absolute;
+  top:40%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:rgba(0,0,0,0.85);
+  color:white;
+  padding:20px 40px;
+  border:2px solid white;
+  font-size:32px;
+  font-family:monospace;
+  text-align:center;
+}
+#winPopup{
+  display:none;
+}
+button{
+  margin-top:20px;
+  padding:12px 25px;
+  font-size:20px;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div id="popup">Monde 2</div>
+
+<div id="winPopup">
+  Vous avez gagné<br>
+  <button onclick="location.href='https://licfapsuppor105-prog.github.io/splitt/game3'">
+    Suivant
+  </button>
+</div>
+
+<audio id="music" src="sonBien (1).mp3" autoplay muted loop></audio>
+<canvas id="game"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+const music = document.getElementById("music");
+window.addEventListener("mousedown",()=>{
+  music.muted = false;
+  music.play();
+},{once:true});
+
+setTimeout(()=>{
+  document.getElementById("popup").style.display = "none";
+},2000);
+
+setTimeout(()=>{
+  document.getElementById("winPopup").style.display = "block";
+},120000);
+
+const map = [
+[1,1,1,1,1,1,1,1],
+[1,0,0,0,0,0,0,1],
+[1,0,1,0,1,0,0,1],
+[1,0,0,0,0,0,0,1],
+[1,0,0,1,0,1,0,1],
+[1,0,0,0,0,0,0,1],
+[1,1,1,1,1,1,1,1]
+];
+
+let player = {
+  x:3.5,
+  y:3.5,
+  angle:0,
+  speed:0.08
+};
+
+let keys = {};
+let recoil = 0;
+let shoot = false;
+
+addEventListener("keydown",e=>keys[e.key.toLowerCase()] = true);
+addEventListener("keyup",e=>keys[e.key.toLowerCase()] = false);
+addEventListener("click",()=>{
+  shoot = true;
+  recoil = 12;
+});
+
+let bots = [];
+
+function spawnBot(){
+  let hp = Math.floor(Math.random()*6)+2;
+
+  bots.push({
+    x:Math.random()*6+1,
+    y:Math.random()*5+1,
+    hp:hp,
+    walk:0
+  });
+}
+
+setInterval(spawnBot,900);
+
+function normalizeAngle(a){
+  while(a < -Math.PI) a += Math.PI*2;
+  while(a > Math.PI) a -= Math.PI*2;
+  return a;
+}
+
+function update(){
+  if(keys['q']) player.angle -= 0.06;
+  if(keys['d']) player.angle += 0.06;
+
+  let mx = Math.cos(player.angle)*player.speed;
+  let my = Math.sin(player.angle)*player.speed;
+
+  if(keys['z']){
+    if(map[Math.floor(player.y)][Math.floor(player.x+mx)]==0) player.x += mx;
+    if(map[Math.floor(player.y+my)][Math.floor(player.x)]==0) player.y += my;
+  }
+
+  if(keys['s']){
+    if(map[Math.floor(player.y)][Math.floor(player.x-mx)]==0) player.x -= mx;
+    if(map[Math.floor(player.y-my)][Math.floor(player.x)]==0) player.y -= my;
+  }
+
+  bots.forEach(bot=>{
+    bot.walk += 0.1;
+  });
+
+  if(shoot){
+    bots.forEach(bot=>{
+      if(bot.hp <= 0) return;
+
+      let dx = bot.x-player.x;
+      let dy = bot.y-player.y;
+      let dist = Math.hypot(dx,dy);
+      let angleToBot = Math.atan2(dy,dx);
+      let diff = normalizeAngle(angleToBot-player.angle);
+
+      if(Math.abs(diff)<0.12 && dist<7){
+        bot.hp--;
+      }
+    });
+
+    shoot = false;
+  }
+
+  if(recoil>0) recoil--;
+}
+
+function draw3D(){
+  let fov = Math.PI/3;
+
+  for(let x=0;x<canvas.width;x++){
+    let rayAngle = player.angle-fov/2+(x/canvas.width)*fov;
+
+    for(let depth=0.1;depth<10;depth+=0.03){
+      let rx = player.x + Math.cos(rayAngle)*depth;
+      let ry = player.y + Math.sin(rayAngle)*depth;
+
+      if(map[Math.floor(ry)][Math.floor(rx)]==1){
+        let h = canvas.height/depth;
+        let shade = 255-depth*40;
+
+        ctx.fillStyle = `rgb(${shade*0.2},${shade*0.8},${shade})`;
+        ctx.fillRect(x,canvas.height/2-h/2,1,h);
+        break;
+      }
+    }
+  }
+}
+
+function drawEnemy(screenX,size,bot){
+  let bob = Math.sin(bot.walk)*4;
+
+  // jambes
+  ctx.fillStyle = "#1a1a1a";
+  ctx.fillRect(screenX-size*0.18, canvas.height/2+size*0.05+bob, size*0.12, size*0.35);
+  ctx.fillRect(screenX+size*0.06, canvas.height/2+size*0.05+bob, size*0.12, size*0.35);
+
+  // torse
+  let bodyColor = bot.hp >= 6 ? "#5500aa" : bot.hp >= 4 ? "#aa0000" : "#cc6600";
+  ctx.fillStyle = bodyColor;
+  ctx.fillRect(screenX-size*0.22, canvas.height/2-size*0.2+bob, size*0.44, size*0.5);
+
+  // bras
+  ctx.fillStyle = "#222";
+  ctx.fillRect(screenX-size*0.33, canvas.height/2-size*0.15+bob, size*0.1, size*0.35);
+  ctx.fillRect(screenX+size*0.23, canvas.height/2-size*0.15+bob, size*0.1, size*0.35);
+
+  // arme
+  ctx.fillStyle = "black";
+  ctx.fillRect(screenX+size*0.2, canvas.height/2+bob, size*0.22, size*0.06);
+
+  // tête
+  ctx.fillStyle = "#d9a066";
+  ctx.beginPath();
+  ctx.arc(screenX, canvas.height/2-size*0.38+bob, size*0.14, 0, Math.PI*2);
+  ctx.fill();
+
+  // yeux
+  ctx.fillStyle = "black";
+  ctx.fillRect(screenX-size*0.05, canvas.height/2-size*0.42+bob, size*0.03, size*0.03);
+  ctx.fillRect(screenX+size*0.02, canvas.height/2-size*0.42+bob, size*0.03, size*0.03);
+}
+
+function drawBots(){
+  bots.forEach(bot=>{
+    if(bot.hp<=0) return;
+
+    let dx = bot.x-player.x;
+    let dy = bot.y-player.y;
+    let dist = Math.hypot(dx,dy);
+
+    let angle = normalizeAngle(Math.atan2(dy,dx)-player.angle);
+
+    if(Math.abs(angle)>0.5) return;
+
+    let size = 340/dist;
+    let screenX = canvas.width/2 + Math.tan(angle)*450;
+
+    drawEnemy(screenX,size,bot);
+  });
+}
+
+function drawWeapon(){
+  let y = recoil;
+
+  let grad = ctx.createLinearGradient(0,0,0,canvas.height);
+  grad.addColorStop(0,"#999");
+  grad.addColorStop(1,"#111");
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(canvas.width/2-90, canvas.height-120+y, 180, 110);
+
+  ctx.fillStyle = "#111";
+  ctx.fillRect(canvas.width/2-20, canvas.height-145+y, 40, 50);
+
+  ctx.strokeStyle = "white";
+  ctx.beginPath();
+  ctx.moveTo(canvas.width/2-8,canvas.height/2);
+  ctx.lineTo(canvas.width/2+8,canvas.height/2);
+  ctx.moveTo(canvas.width/2,canvas.height/2-8);
+  ctx.lineTo(canvas.width/2,canvas.height/2+8);
+  ctx.stroke();
+}
+
+function loop(){
+  ctx.fillStyle = "#3fa9ff";
+  ctx.fillRect(0,0,canvas.width,canvas.height/2);
+
+  ctx.fillStyle = "#1d3d1d";
+  ctx.fillRect(0,canvas.height/2,canvas.width,canvas.height/2);
+
+  update();
+  draw3D();
+  drawBots();
+  drawWeapon();
+
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
